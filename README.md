@@ -83,3 +83,5 @@ Add download status feedback
 Add Jellyfin integration for request tracking
 
 Multi-user role-based control
+
+Developed fully using CHATGPT by Shahid Akram

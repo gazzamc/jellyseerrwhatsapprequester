@@ -41,6 +41,7 @@ npm install
 create a .env file in same folder and update values:
 
 JELLYSEERR_URL=http://your-jellyseerr-server:5055
+
 JELLYSEERR_API_KEY=your_non_admin_api_key
 
 

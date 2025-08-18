@@ -38,11 +38,11 @@ Install dependencies:
 npm install
 
 
-create a .env file in same folder and update values:
+Edit the index.js file and update values with your actual info:
 
-JELLYSEERR_URL=http://your-jellyseerr-server:5055
+const JELLYSEERR_URL = 'http://localhost:5055';
 
-JELLYSEERR_API_KEY=your_non_admin_api_key
+const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
 
 ⚠️ Important:

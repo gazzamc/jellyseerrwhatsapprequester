@@ -1,7 +1,6 @@
 # JellyseerrWhatsAppRequester
 A Bot for requesting media via WhatsApp and adding requests to Jellyseerr.
 
-GitHub README (for your repo)
 # 🎬 WhatsApp Jellyseerr Request Bot
 
 This is a **WhatsApp bot** that lets you search and request **movies or TV series** directly from WhatsApp.  

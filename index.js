@@ -60,7 +60,7 @@ client.on('ready', async () => {
 });
 
 // Main message handler
-client.on('message_create', async msg => {
+client.on('message', async msg => {
     const chat = await msg.getChat();
     if (!CHAT_WHITELIST.includes(chat.name.toLowerCase())) {
         return;

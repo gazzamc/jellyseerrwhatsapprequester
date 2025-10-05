@@ -116,6 +116,8 @@ docker run -d \
   whatsappreq
 ```
 
+> On windows you may need to use backslashes for the first section eg. `.\volumes\whatsAppReq\config:/app/config`
+
 > The container mounts `./volumes/whatsAppReq/config` so session data (QR auth) is persisted.
 
 ---

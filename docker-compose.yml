@@ -1,0 +1,32 @@
+services:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=EU/Paris
+      - PORT=5055 #optional
+    ports:
+      - 5055:5055
+    volumes:
+      - ./volumes/jellyseerr/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
+
+  whatsappreq:
+    container_name: whatsAppReq
+    build: .
+    environment:
+      - JELLYSEERR_URL=http://jellyseerr:5055
+      - API_KEY=YOUR_API_KEY_HERE
+      - CHAT_WHITELIST=change,me # Seperate names via comma (,) seperator, avoid spaces. eg chat1,chat2
+      - CUSTOM_SESSION_PATH=./config # Specify a custom path for auth session, if omitted creates a `session` folder in the app root.
+      - ENABLE_EVENT_MESSAGES=true # Optional, remove if you don't want messages in the channel(s) from the bot eg. Bot Ready
+    volumes:
+      - ./volumes/whatsAppReq/config:/app/config # Perist session or add custom bot messages (events)
+    

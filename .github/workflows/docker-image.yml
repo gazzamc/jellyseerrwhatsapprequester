@@ -69,10 +69,14 @@ jobs:
           ./Dockerfile
         platforms: ${{ matrix.platform }}
 
-    - run: skopeo copy containers-storage:ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:build-${{ env.PODMAN_ARCH }} oci-archive:/tmp/${{ env.PODMAN_ARCH }}-oci.tar
+    - name: Install Podman
+      run: sudo apt-get install -y podman
+
+    - name: Use Podman for copying the image
+      run: podman save --format oci-archive -o /tmp/${{ env.PODMAN_ARCH }}-oci.tar ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:build-${{ env.PODMAN_ARCH }} 
 
     - name: Upload digest
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.IMAGE_NAME }}-build-${{ env.PODMAN_ARCH }}
         path: /tmp/${{ env.PODMAN_ARCH }}-oci.tar
@@ -89,12 +93,12 @@ jobs:
     steps:
 
     - name: Download podman
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ env.IMAGE_NAME }}-build-amd64
         path: /tmp
     - name: Download podman
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ env.IMAGE_NAME }}-build-arm64
         path: /tmp
@@ -106,8 +110,8 @@ jobs:
         OWNER: '${{ github.repository_owner }}'
 
     - run: podman manifest create ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:manifest
-    - run: podman manifest add ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:manifest oci-archive:/tmp/arm64-oci.tar
-    - run: podman manifest add ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:manifest oci-archive:/tmp/amd64-oci.tar
+    - run: podman manifest add ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:manifest  oci-archive:/tmp/amd64-oci.tar
+    - run: podman manifest add ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:manifest  oci-archive:/tmp/arm64-oci.tar
 
     - name: Container meta
       id: meta

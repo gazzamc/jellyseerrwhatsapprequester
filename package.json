@@ -8,7 +8,7 @@
   "description": "jellyseerr requester bot for WhatsApp",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "jest",
     "start": "node src/index.js",
     "lint": "eslint \"apps/**/*.ts\" \"libs/**/*.ts\" \"tests/**/*.ts\"",
     "lint:staged": "lint-staged",

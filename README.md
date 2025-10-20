@@ -10,14 +10,15 @@ It integrates seamlessly with [Jellyseerr](https://github.com/Fallenbagel/jellys
 * 🔎 Search for Movies or TV Series by name
 * 🎥 Provides **IMDb / TVDb links** to confirm results
 * 📩 Request Movies or Full Series (all seasons automatically)
-* ✅ Requests appear in Jellyseerr for approval (or auto-approved with an Admin API key)
+* ✅ Requests appear in Jellyseerr (auto-approved)
+* 🐳 Docker support for easy deployment
 * 🗂 Lightweight and easy to run (Node.js + [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js))
 
 ---
 
 ## 📦 Requirements
 
-* Node.js (>= 18.x)
+* **Node.js (>= 18.x)** or **Docker (>= 20.10)**
 * A running Jellyseerr instance
 * A WhatsApp account for the bot
 
@@ -50,8 +51,7 @@ const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
 ⚠️ **Important Notes**:
 
-* If you use an **Admin API Key**, requests are **auto-approved**.
-* To require approval, use an API key from a **regular Jellyseerr user**.
+Requests made with the Jellyseerr API key are always **auto-approved**. Support for non auto-approved requests may be added later.
 
 ---
 
@@ -177,14 +177,22 @@ docker logs -f whatsAppReq
 
 ---
 
-## 🚀 Roadmap
+## 🚀 Roadmap (unordered)
 
-* Add download status feedback
-* Jellyfin integration for request tracking
-* Multi-user role-based control
+- [x] Add Docker support
+- [x] Multi chat/group support
+- [ ] Refactor to Typescript
+- [ ] Add download status feedback
+- [ ] Requests without Auto-Approval
+- [ ] Jellyfin integration for request tracking
+- [ ] Ability to request specific season(s) for tv shows
+- [ ] Ability to request using only IMDB/TVDB ID or Link (bypassing selection response)
+... and more.
 
 ---
 
 ## 🛠️ Credits
 
-Developed fully using ChatGPT by **Shahid Akram**
+Inspired by and based on [Jellyseerr WhatsApp Requester](https://github.com/drlovesan/JellyseerrWhatsAppRequester) (MIT License).  
+Further development and maintenance by [Gary McGovern](https://github.com/gazzamc).
+

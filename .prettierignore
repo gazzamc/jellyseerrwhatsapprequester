@@ -1,6 +1,3 @@
-# js files
-**/*.js
-
 # compiled output
 build
 **/build
@@ -34,6 +31,8 @@ coverage
 
 .devcontainer
 **/.devcontainer
+
+.eslintrc
 
 # docs
 CHANGELOG.md

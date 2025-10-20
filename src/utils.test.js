@@ -6,13 +6,13 @@ jest.mock('./config', () => ({
 }));
 
 const axios = require('axios');
-const { 
-    processCustomMessage,
-    requestMedia,
-    isRequested,
-    searchJellyseerr,
-    buildResponse,
- } = require('./utils');
+const {
+  processCustomMessage,
+  requestMedia,
+  isRequested,
+  searchJellyseerr,
+  buildResponse,
+} = require('./utils');
 
 // Simulate global `messages` object (used inside processCustomMessage)
 global.messages = null;
@@ -24,7 +24,7 @@ describe('media utility functions', () => {
 
   describe('processCustomMessage', () => {
     afterEach(() => {
-        global.messages = null;
+      global.messages = null;
     });
 
     test('returns undefined if messages not defined', () => {
@@ -54,7 +54,9 @@ describe('media utility functions', () => {
         {
           title: 'Inception',
           releaseDate: '2010-07-16',
-          mediaInfo: { credits: { cast: [{ name: 'Leonardo' }, { name: 'Joseph' }] } },
+          mediaInfo: {
+            credits: { cast: [{ name: 'Leonardo' }, { name: 'Joseph' }] },
+          },
           overview: 'A dream within a dream',
           imdbId: 'tt1375666',
         },
@@ -103,7 +105,9 @@ describe('media utility functions', () => {
 
     test('handles detail fetch errors silently', async () => {
       axios.get
-        .mockResolvedValueOnce({ data: { results: [{ id: 1, mediaType: 'movie' }] } })
+        .mockResolvedValueOnce({
+          data: { results: [{ id: 1, mediaType: 'movie' }] },
+        })
         .mockRejectedValueOnce(new Error('details fail'));
 
       const results = await searchJellyseerr('query', 'movie');
@@ -167,9 +171,11 @@ describe('media utility functions', () => {
       expect(axios.post).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/request'),
         expect.objectContaining({ mediaId: 1, mediaType: 'movie' }),
-        expect.any(Object)
+        expect.any(Object),
       );
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/Inception/));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/Inception/),
+      );
     });
 
     test('includes seasons for TV type', async () => {

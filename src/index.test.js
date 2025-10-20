@@ -20,7 +20,7 @@ jest.mock('qrcode-terminal', () => ({
 }));
 
 jest.mock('fs', () => ({
-  existsSync: jest.fn()
+  existsSync: jest.fn(),
 }));
 
 // Mock config
@@ -48,7 +48,7 @@ const {
   requestMedia,
   searchJellyseerr,
   processCustomMessage,
-  buildResponse
+  buildResponse,
 } = require('./utils');
 
 describe('WhatsApp bot', () => {
@@ -68,22 +68,28 @@ describe('WhatsApp bot', () => {
   });
 
   test('handles QR event and generates code', () => {
-    const handler = mockClient.on.mock.calls.find(c => c[0] === 'qr')[1];
+    const handler = mockClient.on.mock.calls.find((c) => c[0] === 'qr')[1];
     handler('FAKE_QR');
     expect(qrcode.generate).toHaveBeenCalledWith('FAKE_QR', { small: true });
   });
 
   test('handles authenticated event', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const handler = mockClient.on.mock.calls.find(c => c[0] === 'authenticated')[1];
+    const handler = mockClient.on.mock.calls.find(
+      (c) => c[0] === 'authenticated',
+    )[1];
     handler();
-    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/authenticated/i));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/authenticated/i),
+    );
     logSpy.mockRestore();
   });
 
   test('handles disconnected event', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const handler = mockClient.on.mock.calls.find(c => c[0] === 'disconnected')[1];
+    const handler = mockClient.on.mock.calls.find(
+      (c) => c[0] === 'disconnected',
+    )[1];
     handler('session expired');
     expect(logSpy).toHaveBeenCalledWith('session expired');
     logSpy.mockRestore();
@@ -96,7 +102,7 @@ describe('WhatsApp bot', () => {
         sendMessage: jest.fn(),
       };
       mockClient.getChats.mockResolvedValueOnce([fakeChat]);
-      const handler = mockClient.on.mock.calls.find(c => c[0] === 'ready')[1];
+      const handler = mockClient.on.mock.calls.find((c) => c[0] === 'ready')[1];
       await handler();
       expect(fakeChat.sendMessage).toHaveBeenCalledWith('Bot Ready');
     });
@@ -107,7 +113,7 @@ describe('WhatsApp bot', () => {
         sendMessage: jest.fn(),
       };
       mockClient.getChats.mockResolvedValueOnce([fakeChat]);
-      const handler = mockClient.on.mock.calls.find(c => c[0] === 'ready')[1];
+      const handler = mockClient.on.mock.calls.find((c) => c[0] === 'ready')[1];
       await handler();
       expect(fakeChat.sendMessage).not.toHaveBeenCalled();
     });
@@ -119,8 +125,8 @@ describe('WhatsApp bot', () => {
 
     beforeEach(() => {
       jest.spyOn(console, 'error').mockImplementation(() => {}); // suppress console.error
-      
-      handler = mockClient.on.mock.calls.find(c => c[0] === 'message')[1];
+
+      handler = mockClient.on.mock.calls.find((c) => c[0] === 'message')[1];
       msg = {
         from: 'user123',
         body: '!r movie inception',
@@ -138,14 +144,16 @@ describe('WhatsApp bot', () => {
     test('handles !help command', async () => {
       msg.body = '!help';
       await handler(msg);
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/Beep Boop/i));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/Beep Boop/i),
+      );
     });
 
     test('handles no search term', async () => {
       msg.body = '!r';
       await handler(msg);
       expect(msg.reply).toHaveBeenCalledWith(
-        expect.stringMatching(/Please provide a search term/i)
+        expect.stringMatching(/Please provide a search term/i),
       );
     });
 
@@ -153,21 +161,27 @@ describe('WhatsApp bot', () => {
       searchJellyseerr.mockResolvedValueOnce([]);
       msg.body = '!r movie nothing';
       await handler(msg);
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/No movies found/i));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/No movies found/i),
+      );
     });
 
     test('handles no results found when type provided', async () => {
       searchJellyseerr.mockResolvedValueOnce([]);
       msg.body = '!r nothing';
       await handler(msg);
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/No type provided/i));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/No type provided/i),
+      );
     });
 
     test('handles single result already requested', async () => {
       searchJellyseerr.mockResolvedValueOnce([{ id: 1, title: 'Film' }]);
       isRequested.mockResolvedValueOnce(true);
       await handler(msg);
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/already been requested/i));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/already been requested/i),
+      );
     });
 
     test('handles single new result and requests media', async () => {
@@ -179,7 +193,7 @@ describe('WhatsApp bot', () => {
         'movie',
         expect.any(Object),
         msg,
-        'Mock Response'
+        'Mock Response',
       );
     });
 
@@ -209,7 +223,9 @@ describe('WhatsApp bot', () => {
       pendingSelections['user123'] = { type: 'movie', results: [] };
       msg.body = '9';
       await handler(msg);
-      expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/Invalid selection/i));
+      expect(msg.reply).toHaveBeenCalledWith(
+        expect.stringMatching(/Invalid selection/i),
+      );
     });
 
     test('handles Jellyseerr error gracefully', async () => {
@@ -217,7 +233,7 @@ describe('WhatsApp bot', () => {
       msg.body = '!r movie fail';
       await handler(msg);
       expect(msg.reply).toHaveBeenCalledWith(
-        expect.stringMatching(/Error searching Jellyseerr/i)
+        expect.stringMatching(/Error searching Jellyseerr/i),
       );
     });
   });

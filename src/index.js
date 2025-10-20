@@ -13,13 +13,6 @@ const {
 } = require('./utils');
 const qrcode = require('qrcode-terminal');
 
-const fs = require('fs');
-
-let messages;
-if (fs.existsSync('./config/custom_bot_messages.js')) {
-  messages = require('./config/custom_bot_messages.js');
-}
-
 const usage =
   '🤖 *Beep Boop Beep...*\n\n' +
   '*Commands:*\n\n' +

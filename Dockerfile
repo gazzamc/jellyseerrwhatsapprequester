@@ -10,6 +10,11 @@ USER chrome
 
 WORKDIR /app
 COPY ./ /app
+
+USER root
+RUN mkdir -p /config
+USER chrome
+
 RUN npm install
 
 CMD [ "npm","start" ]

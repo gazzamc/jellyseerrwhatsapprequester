@@ -19,10 +19,6 @@ jest.mock('qrcode-terminal', () => ({
   generate: jest.fn(),
 }));
 
-jest.mock('fs', () => ({
-  existsSync: jest.fn(),
-}));
-
 // Mock config
 jest.mock('./config', () => ({
   SESSION_PATH: 'fakeSession',
@@ -43,13 +39,7 @@ const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { pendingSelections } = require('./index');
 const fs = require('fs');
-const {
-  isRequested,
-  requestMedia,
-  searchJellyseerr,
-  processCustomMessage,
-  buildResponse,
-} = require('./utils');
+const { isRequested, requestMedia, searchJellyseerr } = require('./utils');
 
 describe('WhatsApp bot', () => {
   let mockClient;

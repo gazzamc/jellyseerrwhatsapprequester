@@ -3,9 +3,16 @@ jest.mock('axios');
 jest.mock('./config', () => ({
   JELLYSEERR_URL: 'http://fake-jelly',
   API_KEY: 'FAKE_KEY',
+  CUSTOM_MESSAGE_PATH: './__mocks__/custom_bot_messages.js',
+}));
+
+jest.mock('fs', () => ({
+  existsSync: jest.fn().mockReturnValue(false),
 }));
 
 const axios = require('axios');
+const { existsSync } = require('fs');
+const customMessages = require('./__mocks__/custom_bot_messages.js');
 const {
   processCustomMessage,
   requestMedia,
@@ -14,35 +21,43 @@ const {
   buildResponse,
 } = require('./utils');
 
-// Simulate global `messages` object (used inside processCustomMessage)
-global.messages = null;
-
 describe('media utility functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
   });
 
   describe('processCustomMessage', () => {
-    afterEach(() => {
-      global.messages = null;
-    });
-
     test('returns undefined if messages not defined', () => {
-      global.messages = null;
       const result = processCustomMessage('REQ_SUCCESS', []);
       expect(result).toBeUndefined();
     });
 
     test('returns string message if key exists', () => {
-      global.messages = () => ({ REQ_SUCCESS: 'Success message' });
+      jest.doMock('fs', () => ({
+        existsSync: jest.fn().mockReturnValue(true),
+      }));
+
+      jest.doMock('./__mocks__/custom_bot_messages.js', () => {
+        return () => ({
+          REQ_SUCCESS: 'Success message',
+        });
+      });
+
+      const { processCustomMessage } = require('./utils');
+
       const result = processCustomMessage('REQ_SUCCESS', []);
       expect(result).toBe('Success message');
     });
 
     test('executes function if message is a function', () => {
-      global.messages = () => ({
-        REQ_SUCCESS: jest.fn((item) => `Success for ${item}`),
+      jest.doMock('./__mocks__/custom_bot_messages.js', () => {
+        return () => ({
+          REQ_SUCCESS: jest.fn((item) => `Success for ${item}`),
+        });
       });
+      const { processCustomMessage } = require('./utils');
+
       const result = processCustomMessage('REQ_SUCCESS', ['Inception']);
       expect(result).toBe('Success for Inception');
     });

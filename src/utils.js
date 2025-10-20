@@ -1,10 +1,14 @@
 const axios = require('axios');
-const { JELLYSEERR_URL, API_KEY } = require('./config');
+const { existsSync } = require('fs');
+const { JELLYSEERR_URL, API_KEY, CUSTOM_MESSAGE_PATH } = require('./config');
 
 function processCustomMessage(message, args) {
   // If not in docker return undefined
-  if (!messages) {
+  let messages;
+  if (!existsSync(CUSTOM_MESSAGE_PATH)) {
     return undefined;
+  } else {
+    messages = require(CUSTOM_MESSAGE_PATH);
   }
 
   if (typeof messages()[message] === 'function') {

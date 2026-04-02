@@ -86,13 +86,14 @@ IMDb: https://www.imdb.com/title/tt0903747/
 
 You can configure the bot using **environment variables**:
 
-| Variable                | Description                                                     | Default / Example                   |
-| ----------------------- | --------------------------------------------------------------- | ----------------------------------- |
-| `JELLYSEERR_URL`        | URL of your Jellyseerr instance                                 | `http://jellyseerr:5055`            |
-| `API_KEY`               | Jellyseerr API key (admin or user)                              | `YOUR_API_KEY_HERE`                 |
-| `CHAT_WHITELIST`        | Comma-separated list of allowed WhatsApp chat names (no spaces) | `chat1,chat2`                       |
-| `CUSTOM_SESSION_PATH`   | Path to persist WhatsApp session (QR login data)                | `./config`                          |
-| `ENABLE_EVENT_MESSAGES` | Enable/disable bot event messages (e.g., "Bot Ready")           | `true` (remove variable to disable) |
+| Variable                | Description                                                           | Default / Example                     |
+| ----------------------- | ----------------------------------------------------------------------| --------------------------------------|
+| `JELLYSEERR_URL`        | URL of your Jellyseerr instance                                       | `http://jellyseerr:5055`              |
+| `API_KEY`               | Jellyseerr API key (admin or user)                                    | `YOUR_API_KEY_HERE`                   |
+| `CHAT_WHITELIST`        | Comma-separated list of allowed WhatsApp chat names (no spaces)       | `chat1,chat2`                         |
+| `CUSTOM_SESSION_PATH`   | Path to persist WhatsApp session (QR login data)                      | `./config`                            |
+| `ENABLE_EVENT_MESSAGES` | Enable/disable bot event messages (e.g., "Bot Ready")                 | `true` (remove variable to disable)   |
+| `PHONE_NUMBER`          | Alternative to the QR code, input the generated code to link account  | symbol-free format (e.g. 12025550108) |
 
 ---
 
@@ -155,9 +156,10 @@ services:
     environment:
       - JELLYSEERR_URL=http://jellyseerr:5055
       - API_KEY=YOUR_API_KEY_HERE
-      - CHAT_WHITELIST=chat1,chat2 # comma-separated list, no spaces
-      - CUSTOM_SESSION_PATH=./config # optional, for session persistence
-      - ENABLE_EVENT_MESSAGES=true # optional, remove to disable bot event messages
+      - CHAT_WHITELIST=chat1,chat2 # Seperate names via comma (,) seperator, avoid spaces. eg chat1,chat2
+      - CUSTOM_SESSION_PATH=./config # Specify a custom path for auth session, if omitted creates a `session` folder in the app root.
+      - ENABLE_EVENT_MESSAGES=true # Optional, remove if you don't want messages in the channel(s) from the bot eg. Bot Ready
+      - PHONE_NUMBER=0123456789 # Optional, remove this if you want to use the QR code, this will provide a code to link the WhatsApp account. symbol-free format (e.g. 12025550108 for US, 551155501234 for Brazil)
     volumes:
       - ./volumes/whatsAppReq/config:/app/config
     restart: unless-stopped

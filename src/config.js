@@ -8,6 +8,7 @@ const CHATS = process.env.CHAT_WHITELIST?.split(',') || ['change', 'me'];
 const SESSION_PATH = process.env.CUSTOM_SESSION_PATH || 'session'; // When empty string, Defaults to .wwebjs_auth folder in root of app
 const ENABLE_EVENT_MESSAGES = process.env.ENABLE_EVENT_MESSAGES ? true : false; // Disable Ready message here (non docker)
 const CHAT_WHITELIST = CHATS.map((chat) => chat.toLowerCase());
+const PHONE_NUMBER = process.env.PHONE_NUMBER || 0;
 const CUSTOM_MESSAGE_PATH = path.resolve(
   __dirname,
   '../config/custom_bot_messages.js',
@@ -20,4 +21,5 @@ module.exports = {
   ENABLE_EVENT_MESSAGES,
   CHAT_WHITELIST,
   CUSTOM_MESSAGE_PATH,
+  PHONE_NUMBER,
 };

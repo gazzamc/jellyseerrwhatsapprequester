@@ -4,15 +4,19 @@ jest.mock('./config', () => ({
   JELLYSEERR_URL: 'http://fake-jelly',
   API_KEY: 'FAKE_KEY',
   CUSTOM_MESSAGE_PATH: './__mocks__/custom_bot_messages.js',
+  SESSION_PATH: './session',
 }));
 
 jest.mock('fs', () => ({
   existsSync: jest.fn().mockReturnValue(false),
+  readdirSync: jest.fn().mockReturnValue([]),
+  unlinkSync: jest.fn(),
 }));
 
+const path = require('path');
 const axios = require('axios');
-const { existsSync } = require('fs');
-const customMessages = require('./__mocks__/custom_bot_messages.js');
+const fs = require('fs');
+
 const {
   processCustomMessage,
   requestMedia,
@@ -21,10 +25,19 @@ const {
   buildResponse,
 } = require('./utils');
 
+const fileEntry = (name) => ({
+  name,
+  isDirectory: () => false,
+});
+
+const dirEntry = (name) => ({
+  name,
+  isDirectory: () => true,
+});
+
 describe('media utility functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
   });
 
   describe('processCustomMessage', () => {
@@ -34,8 +47,12 @@ describe('media utility functions', () => {
     });
 
     test('returns string message if key exists', () => {
+      jest.resetModules();
+
       jest.doMock('fs', () => ({
         existsSync: jest.fn().mockReturnValue(true),
+        readdirSync: jest.fn(),
+        unlinkSync: jest.fn(),
       }));
 
       jest.doMock('./__mocks__/custom_bot_messages.js', () => {
@@ -51,11 +68,14 @@ describe('media utility functions', () => {
     });
 
     test('executes function if message is a function', () => {
+      jest.resetModules();
+
       jest.doMock('./__mocks__/custom_bot_messages.js', () => {
         return () => ({
           REQ_SUCCESS: jest.fn((item) => `Success for ${item}`),
         });
       });
+
       const { processCustomMessage } = require('./utils');
 
       const result = processCustomMessage('REQ_SUCCESS', ['Inception']);
@@ -134,7 +154,7 @@ describe('media utility functions', () => {
     const msg = { reply: jest.fn() };
 
     beforeEach(() => {
-      jest.spyOn(console, 'error').mockImplementation(() => {}); // suppress console.error
+      jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -171,7 +191,7 @@ describe('media utility functions', () => {
     const msg = { reply: jest.fn() };
 
     beforeEach(() => {
-      jest.spyOn(console, 'error').mockImplementation(() => {}); // suppress console.error
+      jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -202,7 +222,7 @@ describe('media utility functions', () => {
 
       await requestMedia(42, 'tv', item, msg);
       const payload = axios.post.mock.calls[0][1];
-      expect(payload.seasons).toEqual([1]); // skip special
+      expect(payload.seasons).toEqual([1]);
     });
 
     test('handles POST failure and replies error', async () => {
@@ -210,6 +230,141 @@ describe('media utility functions', () => {
       const item = { title: 'BadMovie' };
       await requestMedia(1, 'movie', item, msg);
       expect(msg.reply).toHaveBeenCalledWith(expect.stringMatching(/Failed/));
+    });
+  });
+
+  describe('chrome lock cleanup utilities', () => {
+    const SESSION_PATH = './session';
+    const regex = /^Singleton(Lock|Socket|Cookie)?$/;
+
+    let cleanupFs;
+    let findFiles;
+    let cleanUpChromeLockFiles;
+
+    const loadCleanupUtils = () => {
+      jest.resetModules();
+
+      jest.doMock('fs', () => ({
+        existsSync: jest.fn().mockReturnValue(false),
+        readdirSync: jest.fn().mockReturnValue([]),
+        unlinkSync: jest.fn(),
+      }));
+
+      jest.doMock('./config', () => ({
+        JELLYSEERR_URL: 'http://fake-jelly',
+        API_KEY: 'FAKE_KEY',
+        CUSTOM_MESSAGE_PATH: './__mocks__/custom_bot_messages.js',
+        SESSION_PATH: './session',
+      }));
+
+      cleanupFs = require('fs');
+      ({ findFiles, cleanUpChromeLockFiles } = require('./utils'));
+    };
+
+    const mockConsole = () => {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+    };
+
+    beforeEach(() => {
+      loadCleanupUtils();
+      mockConsole();
+    });
+
+    afterEach(() => {
+      console.log.mockRestore();
+      console.error.mockRestore();
+    });
+
+    describe('findFiles', () => {
+      test('recursively finds matching Singleton files', () => {
+        cleanupFs.readdirSync
+          .mockReturnValueOnce([
+            dirEntry('profile'),
+            fileEntry('notes.txt'),
+            fileEntry('SingletonLock'),
+          ])
+          .mockReturnValueOnce([
+            dirEntry('nested'),
+            fileEntry('SingletonCookie'),
+            fileEntry('random.log'),
+          ])
+          .mockReturnValueOnce([
+            fileEntry('SingletonSocket'),
+            fileEntry('file.txt'),
+          ]);
+
+        const result = findFiles(SESSION_PATH, regex);
+
+        expect(result).toEqual([
+          path.join(SESSION_PATH, 'profile', 'nested', 'SingletonSocket'),
+          path.join(SESSION_PATH, 'profile', 'SingletonCookie'),
+          path.join(SESSION_PATH, 'SingletonLock'),
+        ]);
+      });
+
+      test('returns empty array when no files match', () => {
+        cleanupFs.readdirSync
+          .mockReturnValueOnce([dirEntry('folder'), fileEntry('readme.md')])
+          .mockReturnValueOnce([fileEntry('other.txt')]);
+
+        const result = findFiles(SESSION_PATH, regex);
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('cleanUpChromeLockFiles', () => {
+      const mockLockFiles = () => {
+        cleanupFs.readdirSync.mockReturnValue([
+          fileEntry('SingletonLock'),
+          fileEntry('SingletonCookie'),
+        ]);
+      };
+
+      test('deletes all matching Chrome lock files within SESSION_PATH', () => {
+        mockLockFiles();
+
+        cleanUpChromeLockFiles();
+
+        expect(cleanupFs.unlinkSync).toHaveBeenCalledTimes(2);
+        expect(cleanupFs.unlinkSync).toHaveBeenCalledWith(
+          path.join(SESSION_PATH, 'SingletonLock'),
+        );
+        expect(cleanupFs.unlinkSync).toHaveBeenCalledWith(
+          path.join(SESSION_PATH, 'SingletonCookie'),
+        );
+      });
+
+      test('continues cleanup if one delete fails', () => {
+        mockLockFiles();
+
+        cleanupFs.unlinkSync
+          .mockImplementationOnce(() => {
+            throw new Error('permission denied');
+          })
+          .mockImplementationOnce(() => {});
+
+        cleanUpChromeLockFiles();
+
+        expect(cleanupFs.unlinkSync).toHaveBeenCalledTimes(2);
+        expect(console.error).toHaveBeenCalledWith(
+          '[-] Failed to delete:',
+          path.join(SESSION_PATH, 'SingletonLock'),
+          'permission denied',
+        );
+      });
+
+      test('logs no files found when there are no matches', () => {
+        cleanupFs.readdirSync.mockReturnValue([]);
+
+        cleanUpChromeLockFiles();
+
+        expect(cleanupFs.unlinkSync).not.toHaveBeenCalled();
+        expect(console.log).toHaveBeenCalledWith(
+          '[-] No Files Found. Starting Bot!',
+        );
+      });
     });
   });
 });

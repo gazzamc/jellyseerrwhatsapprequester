@@ -1,6 +1,12 @@
 const axios = require('axios');
-const { existsSync } = require('fs');
-const { JELLYSEERR_URL, API_KEY, CUSTOM_MESSAGE_PATH } = require('./config');
+const path = require('path');
+const { existsSync, readdirSync, unlinkSync } = require('fs');
+const {
+  JELLYSEERR_URL,
+  API_KEY,
+  CUSTOM_MESSAGE_PATH,
+  SESSION_PATH,
+} = require('./config');
 
 function processCustomMessage(message, args) {
   // If not in docker return undefined
@@ -138,10 +144,59 @@ function buildResponse(results, type, searchTerm) {
   return responseText;
 }
 
+function findFiles(dir, regex, results = []) {
+  const entries = readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      findFiles(fullPath, regex, results);
+    } else if (regex.test(entry.name)) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+function cleanUpChromeLockFiles() {
+  const regex = /^Singleton(Lock|Socket|Cookie)?$/;
+  console.log('[-] Searching for Chrome Profile Lock files...');
+  const matches = findFiles(SESSION_PATH, regex);
+
+  const normalizedSessionPath = path.resolve(SESSION_PATH);
+
+  if (matches.length) {
+    console.log('[-] Files Found. Cleaning up!');
+
+    for (const file of matches) {
+      const normalizedFile = path.resolve(file);
+
+      if (
+        normalizedFile !== normalizedSessionPath &&
+        !normalizedFile.startsWith(normalizedSessionPath + path.sep)
+      ) {
+        continue;
+      }
+
+      try {
+        unlinkSync(file);
+      } catch (err) {
+        console.error('[-] Failed to delete:', file, err.message);
+      }
+    }
+  } else {
+    console.log('[-] No Files Found. Starting Bot!');
+  }
+}
+
 module.exports = {
   processCustomMessage,
   requestMedia,
   searchJellyseerr,
   isRequested,
   buildResponse,
+  cleanUpChromeLockFiles,
+  findFiles,
 };

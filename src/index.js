@@ -1,8 +1,11 @@
+const path = require('path');
+
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const {
   SESSION_PATH,
   ENABLE_EVENT_MESSAGES,
   CHAT_WHITELIST,
+  PHONE_NUMBER,
 } = require('./config');
 const {
   requestMedia,
@@ -10,6 +13,7 @@ const {
   searchJellyseerr,
   processCustomMessage,
   buildResponse,
+  cleanUpChromeLockFiles,
 } = require('./utils');
 const qrcode = require('qrcode-terminal');
 
@@ -20,8 +24,11 @@ const usage =
   "*keywords:*\n\t*movie* (default): _Request a movie, e.g. !r movie Big Momma's House_\n\t*series*: _Request a series (all seasons), e.g. !r series My Wife and Kids_\n\n" +
   '_If there is more than 1 result, you will be given a choice. Respond with a valid number to finish the request._\n\n';
 
+cleanUpChromeLockFiles();
+
 // To store ongoing search sessions { userId: { results: [], type: 'movie'|'tv' } }
 let pendingSelections = {};
+let isAuthenticated = false;
 
 const client = new Client({
   authStrategy: new LocalAuth({
@@ -30,16 +37,36 @@ const client = new Client({
   puppeteer: {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
   },
+  ...(PHONE_NUMBER && {
+    pairWithPhoneNumber: {
+      phoneNumber: PHONE_NUMBER,
+    },
+  }),
 });
 
 // Show QR in terminal
 client.on('qr', async (qr) => {
-  qrcode.generate(qr, { small: true });
-  console.log('Scan this QR with your WhatsApp');
+  if (!PHONE_NUMBER) {
+    qrcode.generate(qr, { small: true });
+    console.log('[-] Scan the QR code to link to your WhatsApp account');
+  }
+});
+
+client.on('code', async (code) => {
+  console.log(
+    `[-] Use the following code to link to your WhatsApp account ${code}`,
+  );
 });
 
 client.on('authenticated', async () => {
-  console.log('✅ WhatsApp bot successfully authenticated!');
+  if (!isAuthenticated) {
+    console.log('[-] WhatsApp bot successfully authenticated!');
+    isAuthenticated = true;
+  }
+});
+
+client.on('auth_failure', async (message) => {
+  console.log(`[-] Auth failed - ${message}`);
 });
 
 client.on('disconnected', async (reason) => {

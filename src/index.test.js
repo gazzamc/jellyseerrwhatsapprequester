@@ -33,6 +33,7 @@ jest.mock('./utils', () => ({
   searchJellyseerr: jest.fn(),
   buildResponse: jest.fn(() => 'Mock Response'),
   processCustomMessage: jest.fn().mockReturnValue(undefined), // Return undefined to disable custom messages
+  cleanUpChromeLockFiles: jest.fn(),
 }));
 
 const { Client } = require('whatsapp-web.js');

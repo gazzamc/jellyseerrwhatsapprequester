@@ -66,11 +66,7 @@ async function isRequested(mediaId, msg) {
     for (let i = 0; i < req.data.results.length; i++) {
       const item = req.data.results[i];
       const mediaInfo = item.media;
-      if (
-        mediaInfo.tvdbId === mediaId ||
-        mediaInfo.tmdbId === mediaId ||
-        mediaInfo.imdbId === mediaId
-      ) {
+      if (mediaInfo.tmdbId === mediaId) {
         return true;
       }
     }

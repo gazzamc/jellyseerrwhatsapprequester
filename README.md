@@ -53,6 +53,8 @@ const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
 Requests made with the Jellyseerr API key are always **auto-approved**. Support for non auto-approved requests may be added later.
 
+The bot will **not start** if the `API_KEY` environment variable is not set or is using the placeholder value (`YOUR_API_KEY_HERE`).
+
 ---
 
 ## 💬 Usage Instructions

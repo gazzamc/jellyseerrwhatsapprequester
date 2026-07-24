@@ -1,6 +1,6 @@
 {
   "name": "requester",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gazzamc/jellyseerrwhatsapprequester.git"
@@ -10,9 +10,9 @@
   "scripts": {
     "test": "jest",
     "start": "node src/index.js",
-    "lint": "eslint \"apps/**/*.ts\" \"libs/**/*.ts\" \"tests/**/*.ts\"",
+    "lint": "eslint \"src/**/*.js\"",
     "lint:staged": "lint-staged",
-    "lint:fix": "eslint --fix \"apps/**/*.ts\" \"libs/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint --fix \"src/**/*.js\"",
     "pre-commit": "npm run lint:staged && npm run test:unit",
     "release:major": "standard-version --release-as major && git push --follow-tags",
     "release:minor": "standard-version --release-as minor && git push --follow-tags",
@@ -31,7 +31,7 @@
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.34.6"
+    "whatsapp-web.js": "^1.34.7"
   },
   "devDependencies": {
     "commitizen": "^4.3.0",
